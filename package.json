@@ -1,0 +1,25 @@
+{
+  "name": "veggie_puppeteer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./index.js",
+    "lint:tests": "eslint ./tests --ext .js --fix",
+    "lint:src": "eslint ./src --ext .js --fix"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "babel-eslint": "^8.2.6",
+    "eslint": "^5.2.0",
+    "eslint-config-airbnb": "^17.0.0",
+    "eslint-config-airbnb-base": "^13.0.0",
+    "eslint-loader": "^2.1.0",
+    "eslint-plugin-import": "^2.13.0",
+    "fs": "0.0.1-security",
+    "puppeteer": "^1.6.1"
+  }
+}
