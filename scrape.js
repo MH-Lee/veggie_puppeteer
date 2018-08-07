@@ -2,7 +2,7 @@ const axios = require('axios');
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 
-const words = fs.readFileSync('./wanted_url.txt', 'utf8');
+const words = fs.readFileSync('./items.txt', 'utf8');
 const arr = words.split(',');
 
 // url
@@ -32,14 +32,24 @@ const postData = async (contentData) => {
 const scrapeData = async (page, url) => {
   await page.goto(url);
 
+  const companyJobTitleSelector = '#app > main > div:nth-child(1) > div:nth-child(2) > div.react-container > div.UserJobDetail-cCsxOA.kySZNS > div > div > div > div:nth-child(2) > div.Div-hTZHGu.fezPpG > div:nth-child(2) > h3';
+  const companyNameSelector = '#app > main > div:nth-child(1) > div:nth-child(2) > div.react-container > div.UserJobDetail-cCsxOA.kySZNS > div > div > div > div:nth-child(2) > div.Div-hTZHGu.fezPpG > div:nth-child(2) > h4 > span:nth-child(1)';
+  const companyLocation = '#app > main > div:nth-child(1) > div:nth-child(2) > div.react-container > div.UserJobDetail-cCsxOA.kySZNS > div > div > div > div:nth-child(2) > div.Div-hTZHGu.fezPpG > div:nth-child(2) > h4 > span:nth-child(3) > span:nth-child(2)';
+  const companyContent = '#app > main > div:nth-child(1) > div:nth-child(2) > div.react-container > div.UserJobDetail-cCsxOA.kySZNS > div > div > div > div:nth-child(2) > div:nth-child(3) > h4';
+
+  await page.waitForSelector(companyJobTitleSelector);
+  await page.waitForSelector(companyNameSelector);
+  await page.waitForSelector(companyLocation);
+  await page.waitForSelector(companyContent);
+
   const data = await page.evaluate(() => {
-    const companyJobtitle = document.querySelectorAll('#app > main > div:nth-child(1) > div:nth-child(2) > div.react-container > div.UserJobDetail-cCsxOA.kySZNS > div > div > div > div:nth-child(2) > div.Div-hTZHGu.fezPpG > div:nth-child(2) > h3');
+    const companyJobTitle = document.querySelectorAll('#app > main > div:nth-child(1) > div:nth-child(2) > div.react-container > div.UserJobDetail-cCsxOA.kySZNS > div > div > div > div:nth-child(2) > div.Div-hTZHGu.fezPpG > div:nth-child(2) > h3');
     const companyName = document.querySelectorAll('#app > main > div:nth-child(1) > div:nth-child(2) > div.react-container > div.UserJobDetail-cCsxOA.kySZNS > div > div > div > div:nth-child(2) > div.Div-hTZHGu.fezPpG > div:nth-child(2) > h4 > span:nth-child(1)');
-    const companylocation = document.querySelectorAll('#app > main > div:nth-child(1) > div:nth-child(2) > div.react-container > div.UserJobDetail-cCsxOA.kySZNS > div > div > div > div:nth-child(2) > div.Div-hTZHGu.fezPpG > div:nth-child(2) > h4 > span:nth-child(3) > span:nth-child(2)');
+    const companyLocation = document.querySelectorAll('#app > main > div:nth-child(1) > div:nth-child(2) > div.react-container > div.UserJobDetail-cCsxOA.kySZNS > div > div > div > div:nth-child(2) > div.Div-hTZHGu.fezPpG > div:nth-child(2) > h4 > span:nth-child(3) > span:nth-child(2)');
     const companyContent = document.querySelectorAll('#app > main > div:nth-child(1) > div:nth-child(2) > div.react-container > div.UserJobDetail-cCsxOA.kySZNS > div > div > div > div:nth-child(2) > div:nth-child(3) > h4');
-    const title = companyJobtitle[0].innerText;
+    const title = companyJobTitle[0].innerText;
     const company = companyName[0].innerText;
-    const location = companylocation[0].innerText;
+    const location = companyLocation[0].innerText;
     const content = companyContent[0].innerText;
     const contentData = {
       title,
@@ -49,6 +59,9 @@ const scrapeData = async (page, url) => {
     };
     console.log(title, company, location);
     return contentData;
+  })
+  .catch((error) => {
+    console.log('error: skipping...')
   });
   const res = await postData(data);
   return res;
@@ -58,7 +71,7 @@ const scrapeData = async (page, url) => {
 const main = async () => {
   // Set up browser and page.
   const browser = await puppeteer.launch({
-    headless: true,
+    headless: false,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
   const page = await browser.newPage();
