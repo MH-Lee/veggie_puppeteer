@@ -60,7 +60,7 @@ async function scrapeInfiniteScrollItems(
   const items = await scrapeInfiniteScrollItems(page, extractItems, 10000);
   const today = todayDate();
   // Save extracted items to a file.
-  fs.writeFileSync(format('./wanted_url/{}.txt', `${today}`), `${items}`);
+  fs.writeFileSync(format('./wanted_script/logs/{}.txt', `${today}`), `${items}`);
 
   // Close the browser.
   await browser.close();

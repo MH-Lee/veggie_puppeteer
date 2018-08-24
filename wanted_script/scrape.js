@@ -15,7 +15,7 @@ const todayDate = () => {
 };
 
 const today = todayDate();
-const words = fs.readFileSync(format('./wanted_url/{}.txt', `${today}`), 'utf8');
+const words = fs.readFileSync(format('./wanted_script/logs/{}.txt', `${today}`), 'utf8');
 const arr = words.split(',');
 const contentURL = 'http://45.76.213.33:3000/gobble/api/v1/contents/wanted_job_contents/';
 

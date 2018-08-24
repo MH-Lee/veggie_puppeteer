@@ -17,7 +17,7 @@ const todayDate = () => {
 const today = todayDate();
 const english = /^[A-Za-z0-9]*$/;
 const contentURL = 'http://45.76.213.33:3000/gobble/api/v1/contents/wanted_job_contents/';
-const kerditAPI = 'http://45.76.213.33:3000/gobble/api/v1/contents/kredit_job_contents/';
+const kreditAPI = 'http://45.76.213.33:3000/gobble/api/v1/contents/kredit_job_contents/';
 const kreditJobUrl = 'https://kreditjob.com/';
 const searchBarSelector = '#root > div > div.body-container > div.home-wrapper.row > div > div.home-search-box-container > div > div.search-box-query-box > div > input';
 const firstlist = '#react-autowhatever-1--item-0';
@@ -25,6 +25,13 @@ const firstlist = '#react-autowhatever-1--item-0';
 const getData = async () => {
   const res = await axios.get(contentURL);
   return res.data;
+};
+
+const dataSend = async (array) => {
+  for (let i = 0; i < array.length; i++) {
+    await axios.post(kreditAPI, array[i]);
+    console.log('Data Send Success!');
+  }
 };
 
 const getCompanyList = async () => {
@@ -63,7 +70,7 @@ const main = async (url) => {
   console.log(companyList);
   // Set up browser and page.
   const browser = await puppeteer.launch({
-    headless: false,
+    headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
   const page = await browser.newPage();
@@ -73,7 +80,7 @@ const main = async (url) => {
     await page.goto(url);
     await page.click(searchBarSelector);
     await page.type(searchBarSelector, companyList[i]);
-    await page.waitFor(3000);
+    await page.waitFor(1000);
     await page.click(firstlist)
       .catch(() => { console.log('회사가 없습니다'); });
     const companyNameSelector = '#root > div > div.body-container > div.company-container > div.company-wrapper > div.company-contents > section.company-label-container > div.label-container > div.info-box > div.company-label > span';
@@ -96,16 +103,16 @@ const main = async (url) => {
         const company = companyName[0].innerText;
         const industry = companyIndustry[0].innerText;
         const location = companyLocation[0].innerText;
-        const startIncome = companyStartIncome[0].innerText;
-        const averageIncome = companyEndIncome[0].innerText;
+        const starting_income = companyStartIncome[0].innerText;
+        const average_income = companyEndIncome[0].innerText;
         const contentData = {
           company,
           industry,
           location,
-          startIncome,
-          averageIncome,
+          starting_income,
+          average_income,
         };
-        console.log(company, location, industry, startIncome, averageIncome);
+        console.log(company, location, industry, starting_income, average_income);
         return contentData;
       });
       console.log('Data Crawler Success!');
@@ -114,20 +121,11 @@ const main = async (url) => {
       console.log('error', `${companyList[i]}`);
     }
   }
-  console.log(kreditjobData);
   await browser.close();
-  return kreditjobData;
-};
-
-const dataSend = async (array) => {
-  for (let i = 0; i < array.length; i++) {
-    await axios.post(kerditAPI, array[i]);
-    console.log('Data Send Success!');
-  }
+  console.log(kreditjobData);
+  const res = await dataSend(kreditjobData);
+  console.log(res);
 };
 
 const dataList = main(kreditJobUrl);
 console.log(dataList);
-
-const res = dataSend(dataList);
-console.log(res);
