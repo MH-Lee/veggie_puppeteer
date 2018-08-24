@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./index.js",
+    "wantedUrl": "node ./wanted_script/collector.js",
+    "wantedScrape": "node ./wanted_script/scrape.js",
+    "kreditJobScrape": "node ./kredit_job/kredit_job.js",
     "lint:tests": "eslint ./tests --ext .js --fix",
     "lint:src": "eslint ./src --ext .js --fix"
   },
@@ -20,6 +22,8 @@
     "eslint-loader": "^2.1.0",
     "eslint-plugin-import": "^2.13.0",
     "fs": "0.0.1-security",
-    "puppeteer": "^1.6.1"
+    "google-trends-api": "^4.7.0",
+    "puppeteer": "^1.6.1",
+    "string-format": "^2.0.0"
   }
 }

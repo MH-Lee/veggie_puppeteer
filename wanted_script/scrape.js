@@ -1,31 +1,27 @@
 const axios = require('axios');
 const puppeteer = require('puppeteer');
 const fs = require('fs');
+const format = require('string-format');
 
-const words = fs.readFileSync('./items.txt', 'utf8');
+const todayDate = () => {
+  const x = new Date();
+  const y = x.getFullYear().toString();
+  let m = (x.getMonth() + 1).toString();
+  let d = x.getDate().toString();
+  (d.length === 1) && (d = `0${d}`);
+  (m.length === 1) && (m = `0${m}`);
+  const yyyymmdd = y + m + d;
+  return yyyymmdd;
+};
+
+const today = todayDate();
+const words = fs.readFileSync(format('./wanted_url/{}.txt', `${today}`), 'utf8');
 const arr = words.split(',');
-
-// url
-const jwtURL = 'http://45.77.179.168:3000/api/v1/accounts/api-token-auth/';
-const contentURL = 'http://45.77.179.168:3000/api/v1/contents/job_contents/';
-
-// Authorization
-const username = 'test';
-const password = 'test123123123';
+const contentURL = 'http://45.76.213.33:3000/gobble/api/v1/contents/wanted_job_contents/';
 
 // post data
 const postData = async (contentData) => {
-  const jwtData = {
-    username,
-    password,
-  };
-  const jwtToken = await axios.post(jwtURL, jwtData);
-  const token = jwtToken.data.token;
-  // 쿠키를 가져와서 토큰을 사용한다
-  const headerData = {
-    Authorization: `JWT ${token}`,
-  };
-  const res = await axios.post(contentURL, contentData, { headers: headerData });
+  const res = await axios.post(contentURL, contentData);
   return res;
 };
 
@@ -60,18 +56,22 @@ const scrapeData = async (page, url) => {
     console.log(title, company, location);
     return contentData;
   })
-  .catch((error) => {
-    console.log('error: skipping...')
-  });
-  const res = await postData(data);
+    .catch(() => {
+      console.log('error: skipping...');
+    });
+  data.url = url;
+  const res = await postData(data)
+    .catch(() => {
+      console.log(`${url} skipping ...`);
+    });
   return res;
 };
 
-
+console.log('main');
 const main = async () => {
   // Set up browser and page.
   const browser = await puppeteer.launch({
-    headless: false,
+    headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
   const page = await browser.newPage();

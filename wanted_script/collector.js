@@ -1,8 +1,18 @@
 const fs = require('fs');
 const puppeteer = require('puppeteer');
-// const puppeteerInfiniteScroll = require('puppeteer-infinite-scroll');
+const format = require('string-format');
 
 const wantedUrl = 'https://www.wanted.co.kr/wdlist/518';
+const todayDate = () => {
+  const x = new Date();
+  const y = x.getFullYear().toString();
+  let m = (x.getMonth() + 1).toString();
+  let d = x.getDate().toString();
+  (d.length === 1) && (d = `0${d}`);
+  (m.length === 1) && (m = `0${m}`);
+  const yyyymmdd = y + m + d;
+  return yyyymmdd;
+};
 
 const extractItems = () => {
   const extractedElements = document.querySelectorAll('#job > div.container > div > div > ul > li');
@@ -13,7 +23,6 @@ const extractItems = () => {
   }
   return items;
 };
-
 async function scrapeInfiniteScrollItems(
   page,
   extractItems,
@@ -38,7 +47,7 @@ async function scrapeInfiniteScrollItems(
   // Set up browser and page.
   const browser = await puppeteer.launch({
     timeout: 999999,
-    headless: false,
+    headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
   const page = await browser.newPage();
@@ -49,9 +58,9 @@ async function scrapeInfiniteScrollItems(
 
   // Scroll and extract items from the page.
   const items = await scrapeInfiniteScrollItems(page, extractItems, 10000);
-
+  const today = todayDate();
   // Save extracted items to a file.
-  fs.writeFileSync('./items.txt', `${items}`);
+  fs.writeFileSync(format('./wanted_url/{}.txt', `${today}`), `${items}`);
 
   // Close the browser.
   await browser.close();
