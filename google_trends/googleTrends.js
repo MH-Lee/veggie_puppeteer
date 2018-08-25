@@ -13,10 +13,8 @@ const Datecalc = (ago) => {
   return yyyymmdd;
 };
 
-
-const now = Datecalc(0);
-const threeY = Datecalc(3);
 const contentURL = 'http://45.76.213.33:3000/gobble/api/v1/wanted_page_data';
+const googleTrendsURL = 'http://45.76.213.33:3000/gobble/api/v1/contents/google_trends_contents/';
 
 const getData = async () => {
   const res = await axios.get(contentURL);
@@ -26,12 +24,56 @@ const getData = async () => {
   return data;
 };
 
-const googleTrendsData = getData();
-console.log(googleTrendsData);
+const dataSend = async (array) => {
+  for (let i = 0; i < array.length; i++) {
+    await axios.post(googleTrendsURL, array[i]);
+    console.log('Data Send Success!');
+  }
+};
 
-// googleTrends.interestOverTime({
-//   keyword: 'AWS', startTime: new Date('2017-02-01'), endTime: new Date('2017-02-06'), geo: 'KR',
-// }, (err, results) => {
-//   if (err) console.log('oh no error!', err);
-//   else console.log(results);
-// });
+const googleTrendsDataSend = async (nation) => {
+  const dataArray = [];
+  const start = Datecalc(3);
+  const end = Datecalc(0);
+  const TechData = await getData();
+  const geography = nation;
+  let keyTech = '';
+  for (const tech of TechData) {
+    if (geography === 'KR' && tech === 'Machine Learning') {
+      keyTech = '기계학습';
+    } else if (geography === 'KR' && tech === 'AI') {
+      keyTech = '인공지능';
+    } else if (geography === 'KR' && tech === 'Deep Learning') {
+      keyTech = '딥러닝';
+    } else {
+      keyTech = tech;
+    }
+    const keyword = tech;
+    const starting_date = start;
+    const end_date = end;
+    const geo = geography;
+    await googleTrends.interestOverTime({
+      keyword: `${keyTech}`, startTime: new Date(Datecalc(3)), endTime: new Date(Datecalc(0)), geo: `${geo}`, category: 31,
+    })
+      .then(async (results) => {
+        const data = JSON.stringify(results);
+        const googleObject = {
+          keyword,
+          starting_date,
+          end_date,
+          geo,
+          data,
+        };
+        await dataArray.push(googleObject);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }
+  console.log(dataArray);
+  await dataSend(dataArray);
+  return dataArray;
+};
+
+// googleTrendsDataSend('US');
+googleTrendsDataSend('KR');
