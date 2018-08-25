@@ -8,6 +8,7 @@
     "wantedUrl": "node ./wanted_script/collector.js",
     "wantedScrape": "node ./wanted_script/scrape.js",
     "kreditJobScrape": "node ./kredit_job/kredit_job.js",
+    "googleTrends": "node ./google_trends/googleTrends.js",
     "lint:tests": "eslint ./tests --ext .js --fix",
     "lint:src": "eslint ./src --ext .js --fix"
   },

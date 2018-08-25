@@ -16,15 +16,28 @@ const todayDate = () => {
 
 const today = todayDate();
 const english = /^[A-Za-z0-9]*$/;
-const contentURL = 'http://45.76.213.33:3000/gobble/api/v1/contents/wanted_job_contents/';
+const contentURL = 'http://45.76.213.33:3000/gobble/api/v1/contents/wanted_job_contents/?page={}';
 const kreditAPI = 'http://45.76.213.33:3000/gobble/api/v1/contents/kredit_job_contents/';
 const kreditJobUrl = 'https://kreditjob.com/';
 const searchBarSelector = '#root > div > div.body-container > div.home-wrapper.row > div > div.home-search-box-container > div > div.search-box-query-box > div > input';
 const firstlist = '#react-autowhatever-1--item-0';
 
 const getData = async () => {
-  const res = await axios.get(contentURL);
-  return res.data;
+  let startpage = 0;
+  const dataResult = [];
+  const res = await axios.get(format(contentURL, 1));
+  const page = Math.ceil(Number(res.data.count) / 100);
+  do {
+    startpage += 1;
+    console.log(startpage);
+    const res = await axios.get(format(contentURL, `${startpage}`));
+    console.log(res.data.next);
+    for (const dataObj of res.data.results) {
+      const companyName = dataObj.company;
+      dataResult.push(companyName);
+    }
+  } while (startpage < page);
+  return dataResult;
 };
 
 const dataSend = async (array) => {
@@ -36,14 +49,13 @@ const dataSend = async (array) => {
 
 const getCompanyList = async () => {
   const data = await getData();
-  const tempList = [];
-  for (const dataObj of data.results) {
-    const companyName = dataObj.company;
-    tempList.push(companyName);
-  }
   const companyList = [];
-  const companySet = new Set(tempList);
+  const companySet = new Set(data);
   for (const setElement of companySet) {
+    const tempElement = await setElement.replace('(주)');
+    await fs.appendFile(format('./kredit_job/logs/{}.txt', `${today}`), `${tempElement}\n`, (err) => {
+      if (err) throw err;
+    });
     const splitElement = await setElement.split('(');
     if (splitElement.length === 1) {
       companyList.push(splitElement[0]);
@@ -52,17 +64,17 @@ const getCompanyList = async () => {
     } else if (splitElement[0] === '카카오페이지') {
       companyList.push('카카오');
     } else {
-      console.log('pass');
+      companyList.push(splitElement[0].replace(' ', ''));
     }
   }
-  const logs = companyList.toString();
-  await fs.writeFileSync(format('./kredit_job/logs/{}.txt', `${today}`), `${logs}`);
+  console.log(companyList);
   return companyList;
 };
 
+// const company = getCompanyList();
+// console.log(company);
 // const companyList = fs.readFileSync(format('./kredit_job/logs/{}.txt', `${today}`), 'utf8');
 // const arr = companyList.split(',');
-// arr.splice(1, 1);
 
 console.log('main');
 const main = async (url) => {
